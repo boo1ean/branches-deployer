@@ -2,7 +2,6 @@ var Promise = require('bluebird');
 var yaml = require('yamljs');
 var exec = require('child_process').execSync;
 var fmt = require('util').format;
-var _ = require('lodash');
 
 module.exports = function updateContainer (workspacePath, branchName) {
 	var config = yaml.load(fmt('%s/docker-compose.yml', workspacePath));
@@ -13,15 +12,11 @@ module.exports = function updateContainer (workspacePath, branchName) {
 		return;
 	}
 
-	return Promise.resolve(createBranchCopy())
-		.then(function execDeploy () {
-			console.log('exec container update');
-			exec(fmt("docker exec %s ad deploy local", lowerBranchName));
-			console.log('exec container update done');
-		})
-		.then(function () {
-			console.log('DONE MOTHEFDJFJDJFF');
-		});
+	return Promise
+		.resolve(createBranchCopy())
+		.then(execContainerUpdate)
+		.then(reportSuccess)
+		.catch(console.error);
 
 	function createBranchCopy () {
 		console.log('copy start');
@@ -33,5 +28,14 @@ module.exports = function updateContainer (workspacePath, branchName) {
 		exec(fmt('cp %s/repo/.bowerrc %s/branches/%s/', workspacePath, workspacePath, branchName));
 		console.log('copy end');
 	}
-};
 
+	function execContainerUpdate () {
+		console.log('exec container update');
+		exec(fmt("docker exec %s ad deploy local", lowerBranchName));
+		console.log('exec container update done');
+	}
+
+	function reportSuccess () {
+		console.log('UPDATE DONE MATHERFUCKER!!!!');
+	}
+};
