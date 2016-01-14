@@ -12,9 +12,8 @@ events.on('new branch created', function (params) {
 	startContainer(workspacePath, branchName);
 });
 
-events.on('new commits', function (params) {
-	console.log(params);
-	var branchName = params.ref;
+events.on('commits pushed', function (params) {
+	var branchName = params.ref.split('/').pop();
 	console.log('update container: %s', branchName);
 	updateContainer(workspacePath, branchName);
 });

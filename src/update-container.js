@@ -14,15 +14,22 @@ module.exports = function updateContainer (workspacePath, branchName) {
 
 	return Promise.resolve(createBranchCopy())
 		.then(function execDeploy () {
+			console.log('exec container update');
 			exec(fmt("docker exec %s ad deploy local", branchName));
+			console.log('exec container update done');
+		})
+		.then(function () {
+			console.log('DONE MOTHEFDJFJDJFF');
 		});
 
 	function createBranchCopy () {
-		exec(fmt('cd %s/repo; git fetch; git co %s', workspacePath, branchName));
+		console.log('copy start');
+		exec(fmt('cd %s/repo; git checkout %s; git pull origin %s', workspacePath, branchName, branchName));
 		exec(fmt('mkdir -p %s/%s; rsync -rv --exclude .git --exclude ./vendor --exclude node_modules %s/repo/* %s/%s', workspacePath, branchName, workspacePath, workspacePath, branchName));
 		exec(fmt('ln -fs /repo/node_modules %s/%s/node_modules', workspacePath, branchName));
 		exec(fmt('ln -fs /repo/vendor %s/%s/vendor', workspacePath, branchName));
 		exec(fmt('cp %s/repo/.bowerrc %s/%s/', workspacePath, workspacePath, branchName));
+		console.log('copy end');
 	}
 };
 
