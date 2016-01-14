@@ -6,8 +6,9 @@ var _ = require('lodash');
 
 module.exports = function updateContainer (workspacePath, branchName) {
 	var config = yaml.load(fmt('%s/docker-compose.yml', workspacePath));
+	var lowerBranchName = branchName.toLowerCase();
 
-	if (!config[branchName]) {
+	if (!config[lowerBranchName]) {
 		console.log('Branch %s does not exist, can not update, sry bro :(');
 		return;
 	}
@@ -15,7 +16,7 @@ module.exports = function updateContainer (workspacePath, branchName) {
 	return Promise.resolve(createBranchCopy())
 		.then(function execDeploy () {
 			console.log('exec container update');
-			exec(fmt("docker exec %s ad deploy local", branchName));
+			exec(fmt("docker exec %s ad deploy local", lowerBranchName));
 			console.log('exec container update done');
 		})
 		.then(function () {

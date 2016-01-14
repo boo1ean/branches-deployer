@@ -9,6 +9,8 @@ var renderVhost = _.template(fs.readFileSync(__dirname + '/vhost').toString());
 
 module.exports = function startContainer (workspacePath, branchName) {
 	var config = yaml.load(fmt('%s/docker-compose.yml', workspacePath));
+	var lowerBranchName = branchName.toLowerCase();
+
 	Promise.all([
 		updateNginxConfig(),
 		createBranchCopy()
@@ -27,7 +29,7 @@ module.exports = function startContainer (workspacePath, branchName) {
 	}
 
 	function createBranchCopy () {
-		exec(fmt('cd %s/repo; git fetch; git co %s', workspacePath, branchName));
+		exec(fmt('cd %s/repo; git fetch; git checkout %s', workspacePath, branchName));
 		exec(fmt('mkdir -p %s/%s; rsync -rv --exclude .git --exclude ./vendor --exclude node_modules %s/repo/* %s/%s', workspacePath, branchName, workspacePath, workspacePath, branchName));
 		exec(fmt('ln -fs /repo/node_modules %s/%s/node_modules', workspacePath, branchName));
 		exec(fmt('ln -fs /repo/vendor %s/%s/vendor', workspacePath, branchName));
@@ -45,8 +47,8 @@ module.exports = function startContainer (workspacePath, branchName) {
 		};
 
 		var containers = _.omit(config, ['nginx']);
-		containers[branchName] = {
-			container_name: branchName,
+		containers[lowerBranchName] = {
+			container_name: lowerBranchName,
 			build: fmt('./%s', branchName),
 			volumes: [
 				fmt('%s/%s:/usr/src/app', workspacePath, branchName),
