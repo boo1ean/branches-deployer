@@ -18,33 +18,42 @@ module.exports = function startContainer (workspacePath, branchName) {
 	.catch(console.error);
 
 	function updateNginxConfig () {
-		exec(fmt('mkdir -p %s/sites-enabled', workspacePath));
-		fs.writeFileSync(fmt('%s/sites-enabled/%s',workspacePath, branchName), renderVhost({
+		fs.writeFileSync(fmt('%s/nginx/nginx/sites-enabled/%s',workspacePath, branchName), renderVhost({
 			upstream: getUpstream(branchName),
-			domain: getDomain(branchName)
+			domain: getDomain(branchName),
+			branchName: branchName
 		}));
 	}
 
 	function createBranchCopy () {
 		exec(fmt('cd %s/repo; git fetch; git co %s', workspacePath, branchName));
-		exec(fmt('mkdir -p %s/%s; rsync -rv --exclude=.git %s/repo/* %s', workspacePath, branchName, workspacePath, branchName));
+		exec(fmt('mkdir -p %s/%s; rsync -rv --exclude .git --exclude ./vendor --exclude node_modules %s/repo/* %s/%s', workspacePath, branchName, workspacePath, workspacePath, branchName));
+		exec(fmt('ln -fs /repo/node_modules %s/%s/node_modules', workspacePath, branchName));
+		exec(fmt('ln -fs /repo/vendor %s/%s/vendor', workspacePath, branchName));
+		exec(fmt('cp %s/repo/.bowerrc %s/%s/', workspacePath, workspacePath, branchName));
 	}
 
 	function generateDockerComposeConfig () {
 		var nginx = {
+			container_name: 'nginx',
 			build: './nginx',
+			ports: ['80:80'],
+			volumes: [fmt('%s/nginx/nginx:/etc/nginx', workspacePath)],
 			links: []
 		};
 
 		var containers = _.omit(config, ['nginx']);
 		containers[branchName] = {
-			name: branchName,
-			build: './app',
-			volumes: [fmt('%s/%s:/usr/src/cpa', workspacePath, branchName)]
+			container_name: branchName,
+			build: fmt('./%s', branchName),
+			volumes: [
+				fmt('%s/%s:/usr/src/app', workspacePath, branchName),
+				fmt('%s/repo:/repo', workspacePath),
+			]
 		};
 
 		_.each(containers, function (container) {
-			nginx.links.push(container.name);
+			nginx.links.push(container.container_name);
 		});
 
 		containers['nginx'] = nginx;
@@ -61,5 +70,5 @@ function getUpstream (branchName) {
 }
 
 function getDomain (branchName) {
-	return branchName + 'evstaging.com';
+	return branchName + '.beatssound.ru';
 }

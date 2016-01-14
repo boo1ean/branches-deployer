@@ -1,4 +1,4 @@
-upstream backend_upstream {
+upstream <%= branchName %>_upstream {
 	server <%= upstream %>;
 }
 
@@ -19,7 +19,7 @@ server {
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection "upgrade";
 
-		proxy_pass http://backend_upstream;
+		proxy_pass http://<%= branchName %>_upstream;
 		proxy_redirect off;
 
 		tcp_nodelay on;
