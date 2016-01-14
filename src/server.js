@@ -1,5 +1,5 @@
 var githubEvents = require('github-events');
-var generateConfigs = require('./generate-configs');
+var generateConfigs = require('./start-container');
 var path = require('path');
 
 var events = githubEvents();
