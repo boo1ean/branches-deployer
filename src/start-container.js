@@ -14,6 +14,7 @@ module.exports = function startContainer (workspacePath, branchName) {
 		createBranchCopy()
 	])
 	.then(generateDockerComposeConfig)
+	.then(dockerComposeUp)
 	.then(reportSuccess)
 	.catch(console.error);
 
@@ -59,6 +60,10 @@ module.exports = function startContainer (workspacePath, branchName) {
 
 		containers['nginx'] = nginx;
 		fs.writeFileSync(fmt('%s/docker-compose.yml', workspacePath), yaml.stringify(containers, 4));
+	}
+
+	function dockerComposeUp () {
+		exec(fmt('cd %s; docker-compose up -d', workspacePath));
 	}
 
 	function reportSuccess () {
