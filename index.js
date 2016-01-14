@@ -1,4 +1,4 @@
-var startContainer = require('./src/generate-configs');
+var startContainer = require('./src/start-container');
 var path = require('path');
 
-startContainer(path.resolve('workspace'), 'master');
+startContainer(path.resolve('workspace'), 'dev');
