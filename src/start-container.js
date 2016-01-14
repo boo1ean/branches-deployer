@@ -30,6 +30,7 @@ module.exports = function startContainer (workspacePath, branchName) {
 		exec(fmt('mkdir -p %s/%s; rsync -rv --exclude .git --exclude ./vendor --exclude node_modules %s/repo/* %s/%s', workspacePath, branchName, workspacePath, workspacePath, branchName));
 		exec(fmt('ln -fs /repo/node_modules %s/%s/node_modules', workspacePath, branchName));
 		exec(fmt('ln -fs /repo/vendor %s/%s/vendor', workspacePath, branchName));
+		exec(fmt('ln -fs /repo/.git %s/%s/.git', workspacePath, branchName));
 		exec(fmt('cp %s/repo/.bowerrc %s/%s/', workspacePath, workspacePath, branchName));
 	}
 
