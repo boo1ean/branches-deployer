@@ -29,15 +29,18 @@ module.exports = function startContainer (workspacePath, branchName) {
 	}
 
 	function createBranchCopy () {
+		console.log('start files copy');
 		exec(fmt('cd %s/repo; git fetch; git checkout %s', workspacePath, branchName));
-		exec(fmt('mkdir -p %s/%s; rsync -rv --exclude .git --exclude ./vendor --exclude node_modules %s/repo/* %s/%s', workspacePath, branchName, workspacePath, workspacePath, branchName));
-		exec(fmt('ln -fs /repo/node_modules %s/%s/node_modules', workspacePath, branchName));
-		exec(fmt('ln -fs /repo/vendor %s/%s/vendor', workspacePath, branchName));
-		exec(fmt('ln -fs /repo/.git %s/%s/.git', workspacePath, branchName));
-		exec(fmt('cp %s/repo/.bowerrc %s/%s/', workspacePath, workspacePath, branchName));
+		exec(fmt('mkdir -p %s/branches/%s; rsync -rv --exclude .git --exclude node_modules %s/repo/* %s/branches/%s', workspacePath, branchName, workspacePath, workspacePath, branchName));
+		exec(fmt('ln -fs /repo/node_modules %s/branches/%s/node_modules', workspacePath, branchName));
+		exec(fmt('ln -fs /repo/vendor %s/branches/%s/vendor', workspacePath, branchName));
+		exec(fmt('ln -fs /repo/.git %s/branches/%s/.git', workspacePath, branchName));
+		exec(fmt('cp %s/repo/.bowerrc %s/branches/%s/', workspacePath, workspacePath, branchName));
+		console.log('finished files copy');
 	}
 
 	function generateDockerComposeConfig () {
+		console.log('containers configs generation started');
 		var nginx = {
 			container_name: 'nginx',
 			build: './nginx',
@@ -49,9 +52,9 @@ module.exports = function startContainer (workspacePath, branchName) {
 		var containers = _.omit(config, ['nginx']);
 		containers[lowerBranchName] = {
 			container_name: lowerBranchName,
-			build: fmt('./%s', branchName),
+			build: fmt('./branches/%s', branchName),
 			volumes: [
-				fmt('%s/%s:/usr/src/app', workspacePath, branchName),
+				fmt('%s/branches/%s:/usr/src/app', workspacePath, branchName),
 				fmt('%s/repo:/repo', workspacePath),
 			]
 		};
@@ -62,9 +65,11 @@ module.exports = function startContainer (workspacePath, branchName) {
 
 		containers['nginx'] = nginx;
 		fs.writeFileSync(fmt('%s/docker-compose.yml', workspacePath), yaml.stringify(containers, 4));
+		console.log('containers configs generation finished');
 	}
 
 	function dockerComposeUp () {
+		console.log('run docker-compose up -d');
 		exec(fmt('cd %s; docker-compose up -d', workspacePath));
 	}
 
