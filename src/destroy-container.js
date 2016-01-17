@@ -33,7 +33,7 @@ module.exports = function destroyContainer (workspacePath, branchName) {
 		console.log('finished killing container');
 	}
 
-	function removeVhost () {
+	function removeNginxVhost () {
 		console.log('start removing nginx vhost');
 		exec(fmt('rm %s', paths.nginxVhost));
 		console.log('finished removing nginx vhost');
