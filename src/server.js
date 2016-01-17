@@ -1,6 +1,7 @@
 var githubEvents = require('github-events');
 var startContainer = require('./start-container');
 var updateContainer = require('./update-container');
+var destroyContainer = require('./destroy-container');
 var path = require('path');
 
 var events = githubEvents({ port: 3333 });
@@ -17,6 +18,6 @@ events.on('commits pushed', (branchName, params) => {
 });
 
 events.on('branch deleted', (branchName, params) => {
-	console.log('update container: %s', branchName);
-	updateContainer(workspacePath, branchName);
+	console.log('destroy container: %s', branchName);
+	destroyContainer(workspacePath, branchName);
 });

@@ -6,7 +6,7 @@ var generatePaths = require('./paths');
 
 module.exports = function updateContainer (workspacePath, branchName) {
 	var paths = generatePaths(workspacePath, branchName);
-	var config = yaml.load(paths.dockerComposeConfig, workspacePath);
+	var config = yaml.load(paths.dockerComposeConfig);
 
 	if (!config[paths.lowerBranchName]) {
 		console.log('Branch %s does not exist, can not update, sry bro :(', branchName);
