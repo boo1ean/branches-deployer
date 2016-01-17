@@ -1,3 +1,5 @@
+var fmt = require('util').format;
+
 const templates = {
 	branch: '%s/branches/%s',
 	dockerComposeConfig: '%s/docker-compose.yml',
