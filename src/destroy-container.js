@@ -2,6 +2,7 @@ var Promise = require('bluebird');
 var yaml = require('yamljs');
 var exec = require('child_process').execSync;
 var fmt = require('util').format;
+var fs = require('fs');
 var generatePaths = require('./paths');
 
 module.exports = function destroyContainer (workspacePath, branchName) {
@@ -44,6 +45,7 @@ module.exports = function destroyContainer (workspacePath, branchName) {
 		var toRemoveIndex = config.nginx.links.indexOf(paths.lowerBranchName);
 		config.nginx.links.splice(toRemoveIndex, 1);
 		delete config[paths.lowerBranchName];
+		fs.writeFileSync(paths.dockerComposeConfig, yaml.stringify(config, 4));
 		console.log('finished updating docker-compose.yml');
 	}
 
