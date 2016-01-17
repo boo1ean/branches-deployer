@@ -17,9 +17,9 @@ module.exports = function destroyContainer (workspacePath, branchName) {
 	return Promise
 		.resolve(removeBranchDirectory())
 		.then(killContainer)
-		.then(reportSuccess)
 		.then(removeNginxVhost)
 		.then(regenerateDockerComposeConfig)
+		.then(reportSuccess)
 		.catch(console.error);
 
 	function removeBranchDirectory () {
@@ -50,6 +50,6 @@ module.exports = function destroyContainer (workspacePath, branchName) {
 	}
 
 	function reportSuccess () {
-		console.log('UPDATE DONE MATHERFUCKER!!!!');
+		console.log('DESTROY DONE MATHERFUCKER!!!!');
 	}
 }
