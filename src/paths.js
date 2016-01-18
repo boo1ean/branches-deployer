@@ -19,7 +19,7 @@ module.exports = function generatePaths (workspacePath, branchName, deployConfig
 		nginxVhosts:         fmt(t.nginxVhosts, workspacePath),
 		nginxImage:          fmt(t.nginxImage, workspacePath),
 		nginxConfigs:        fmt(t.nginxConfigs, workspacePath),
-		containerName:       fmt(t.containerName, deployConfig.domain.replace(/\./g, '-'), branchName),
+		containerName:       fmt(t.containerName, branchName.toLowerCase(), deployConfig.domain.replace(/\./g, '-')),
 
 		getUpstream: getUpstream,
 		getUpstreamName: getUpstreamName,
