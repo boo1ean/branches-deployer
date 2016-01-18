@@ -28,7 +28,7 @@ module.exports = function startContainer (workspacePath, branchName, deployConfi
 
 		function generateVhostConfig (vhost) {
 			var vhostParams = {
-				upstream: paths.getUpstream(paths.lowerBranchName, vhost.port),
+				upstream: paths.getUpstream(paths.containerName, vhost.port),
 				upstreamName: paths.getUpstreamName(deployConfig.domain, branchName, vhost.name),
 				domain: paths.getDomain(deployConfig.domain, vhost.name, paths.lowerBranchName)
 			};
