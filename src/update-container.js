@@ -4,12 +4,12 @@ var exec = require('child_process').execSync;
 var fmt = require('util').format;
 var generatePaths = require('./paths');
 
-module.exports = function updateContainer (workspacePath, branchName) {
-	var paths = generatePaths(workspacePath, branchName);
+module.exports = function updateContainer (workspacePath, branchName, deployConfig) {
+	var paths = generatePaths(workspacePath, branchName, deployConfig);
 	var config = yaml.load(paths.dockerComposeConfig);
 
-	if (!config[paths.lowerBranchName]) {
-		console.log('Branch %s does not exist, can not update, sry bro :(', branchName);
+	if (!config[paths.containerName]) {
+		console.log('Branch %s does not exist, can not update, sry bro :(', paths.containerName);
 		return;
 	}
 
@@ -33,7 +33,7 @@ module.exports = function updateContainer (workspacePath, branchName) {
 
 	function execContainerUpdate () {
 		console.log('exec container update');
-		exec(fmt("docker exec %s ad deploy local", paths.lowerBranchName));
+		exec(fmt("docker exec %s ad deploy local", paths.containerName));
 		console.log('exec container update done');
 	}
 

@@ -4,13 +4,14 @@ var exec = require('child_process').execSync;
 var fmt = require('util').format;
 var fs = require('fs');
 var generatePaths = require('./paths');
+var _ = require('lodash');
 
-module.exports = function destroyContainer (workspacePath, branchName) {
-	var paths = generatePaths(workspacePath, branchName);
+module.exports = function destroyContainer (workspacePath, branchName, deployConfig) {
+	var paths = generatePaths(workspacePath, branchName, deployConfig);
 	var config = yaml.load(paths.dockerComposeConfig);
 
-	if (!config[paths.lowerBranchName]) {
-		console.log('Branch %s does not exist, can not destroy it, sry bro :(', branchName);
+	if (!config[paths.containerName]) {
+		console.log('Branch %s does not exist, can not destroy it, sry bro :(', paths.containerName);
 		return;
 	}
 
@@ -30,23 +31,31 @@ module.exports = function destroyContainer (workspacePath, branchName) {
 
 	function killContainer () {
 		console.log('start killing container');
-		exec(fmt('docker kill %s', paths.lowerBranchName));
+		exec(fmt('docker kill %s', paths.containerName));
 		console.log('finished killing container');
 	}
 
 	function removeNginxVhost () {
 		console.log('start removing nginx vhost');
-		exec(fmt('rm %s', paths.nginxVhost));
-		console.log('finished removing nginx vhost');
+		_.each(deployConfig.vhosts, removeNginxVhost);
+
+		function removeNginxVhost (vhost) {
+			var vhostPath = paths.getVhostPath(deployConfig.domain, branchName, vhost.name);
+			console.log('vhost path: %s', vhostPath);
+			console.log('removed: %s',vhostPath);
+			exec(fmt('rm %s', vhostPath));
+		}
+
+		console.log('finished removing nginx vhosts');
 	}
 
 	function regenerateDockerComposeConfig () {
 		console.log('start updating docker-compose.yml');
-		var toRemoveIndex = config.nginx.links.indexOf(paths.lowerBranchName);
+		var toRemoveIndex = config.nginx.links.indexOf(paths.containerName);
 		config.nginx.links.splice(toRemoveIndex, 1);
-		delete config[paths.lowerBranchName];
+		delete config[paths.containerName];
 		fs.writeFileSync(paths.dockerComposeConfig, yaml.stringify(config, 4));
-		console.log('finished updating docker-compose.yml');
+		console.log('finished updating docker-compose.yml (removed %s)', paths.containerName);
 	}
 
 	function reportSuccess () {

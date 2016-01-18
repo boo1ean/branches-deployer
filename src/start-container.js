@@ -28,11 +28,11 @@ module.exports = function startContainer (workspacePath, branchName, deployConfi
 
 		function generateVhostConfig (vhost) {
 			var vhostParams = {
-				upstream: getUpstream(paths.lowerBranchName, vhost.port),
-				upstreamName: getUpstreamName(deployConfig.domain, branchName, vhost.name),
-				domain: getDomain(deployConfig.domain, vhost.name, paths.lowerBranchName)
+				upstream: paths.getUpstream(paths.lowerBranchName, vhost.port),
+				upstreamName: paths.getUpstreamName(deployConfig.domain, branchName, vhost.name),
+				domain: paths.getDomain(deployConfig.domain, vhost.name, paths.lowerBranchName)
 			};
-			var vhostPath = getVhostPath(deployConfig.domain, branchName, vhost.name);
+			var vhostPath = paths.getVhostPath(deployConfig.domain, branchName, vhost.name);
 			var vhostConfig = renderVhost(vhostParams);
 
 			console.log('vhost path: %s', vhostPath);
@@ -75,7 +75,6 @@ module.exports = function startContainer (workspacePath, branchName, deployConfi
 			]
 		};
 
-
 		_.each(containers, function (container) {
 			nginx.links.push(container.container_name);
 		});
@@ -93,25 +92,5 @@ module.exports = function startContainer (workspacePath, branchName, deployConfi
 
 	function reportSuccess () {
 		console.log('DONE MATHERFUCKER');
-	}
-
-	function getUpstream (hostName, port) {
-		return fmt('%s:%s', hostName, port);
-	}
-
-	function getUpstreamName (baseDomain, branchName, vhostName) {
-		return fmt('%s_%s_%s', vhostName, branchName, baseDomain);
-	}
-
-	function getDomain (baseDomain, vhostName, lowerBranchName) {
-		if (vhostName === '@') {
-			return fmt('%s.%s', lowerBranchName, baseDomain);
-		}
-
-		return fmt('%s.%s.%s', vhostName, lowerBranchName, baseDomain);
-	}
-
-	function getVhostPath (baseDomain, branchName, vhostName) {
-		return fmt('%s/%s', paths.nginxVhosts, getUpstreamName(baseDomain, branchName, vhostName));
 	}
 }

@@ -19,6 +19,31 @@ module.exports = function generatePaths (workspacePath, branchName, deployConfig
 		nginxVhosts:         fmt(t.nginxVhosts, workspacePath),
 		nginxImage:          fmt(t.nginxImage, workspacePath),
 		nginxConfigs:        fmt(t.nginxConfigs, workspacePath),
-		containerName:       fmt(t.containerName, deployConfig.domain.replace(/\./g, '-'), branchName)
+		containerName:       fmt(t.containerName, deployConfig.domain.replace(/\./g, '-'), branchName),
+
+		getUpstream: getUpstream,
+		getUpstreamName: getUpstreamName,
+		getDomain: getDomain,
+		getVhostPath: getVhostPath
 	};
+}
+
+function getUpstream (hostName, port) {
+	return fmt('%s:%s', hostName, port);
+}
+
+function getUpstreamName (baseDomain, branchName, vhostName) {
+	return fmt('%s_%s_%s', vhostName, branchName, baseDomain);
+}
+
+function getDomain (baseDomain, vhostName, lowerBranchName) {
+	if (vhostName === '@') {
+		return fmt('%s.%s', lowerBranchName, baseDomain);
+	}
+
+	return fmt('%s.%s.%s', vhostName, lowerBranchName, baseDomain);
+}
+
+function getVhostPath (baseDomain, branchName, vhostName) {
+	return fmt('%s/%s', paths.nginxVhosts, getUpstreamName(baseDomain, branchName, vhostName));
 }
