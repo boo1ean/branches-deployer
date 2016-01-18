@@ -40,7 +40,7 @@ module.exports = function destroyContainer (workspacePath, branchName, deployCon
 		_.each(deployConfig.vhosts, removeNginxVhost);
 
 		function removeNginxVhost (vhost) {
-			var vhostPath = paths.getVhostPath(deployConfig.domain, branchName, vhost.name);
+			var vhostPath = paths.getVhostPath(paths.nginxVhosts, deployConfig.domain, branchName, vhost.name);
 			console.log('vhost path: %s', vhostPath);
 			console.log('removed: %s',vhostPath);
 			exec(fmt('rm %s', vhostPath));

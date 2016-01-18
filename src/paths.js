@@ -44,6 +44,6 @@ function getDomain (baseDomain, vhostName, lowerBranchName) {
 	return fmt('%s.%s.%s', vhostName, lowerBranchName, baseDomain);
 }
 
-function getVhostPath (baseDomain, branchName, vhostName) {
-	return fmt('%s/%s', paths.nginxVhosts, getUpstreamName(baseDomain, branchName, vhostName));
+function getVhostPath (nginxVhostsPath, baseDomain, branchName, vhostName) {
+	return fmt('%s/%s', nginxVhostsPath, getUpstreamName(baseDomain, branchName, vhostName));
 }

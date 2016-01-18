@@ -32,7 +32,7 @@ module.exports = function startContainer (workspacePath, branchName, deployConfi
 				upstreamName: paths.getUpstreamName(deployConfig.domain, branchName, vhost.name),
 				domain: paths.getDomain(deployConfig.domain, vhost.name, paths.lowerBranchName)
 			};
-			var vhostPath = paths.getVhostPath(deployConfig.domain, branchName, vhost.name);
+			var vhostPath = paths.getVhostPath(paths.nginxVhosts, deployConfig.domain, branchName, vhost.name);
 			var vhostConfig = renderVhost(vhostParams);
 
 			console.log('vhost path: %s', vhostPath);
