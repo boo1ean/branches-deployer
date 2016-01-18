@@ -8,8 +8,8 @@ var generatePaths = require('./paths');
 
 var renderVhost = _.template(fs.readFileSync(__dirname + '/vhost').toString());
 
-module.exports = function startContainer (workspacePath, branchName) {
-	var paths = generatePaths(workspacePath, branchName);
+module.exports = function startContainer (workspacePath, branchName, deployConfig) {
+	var paths = generatePaths(workspacePath, branchName, deployConfig);
 	var config = yaml.load(paths.dockerComposeConfig);
 
 	Promise.all([
@@ -22,11 +22,26 @@ module.exports = function startContainer (workspacePath, branchName) {
 		.catch(console.error);
 
 	function updateNginxConfig () {
-		fs.writeFileSync(paths.nginxVhost, renderVhost({
-			upstream: getUpstream(branchName),
-			domain: getDomain(branchName),
-			branchName: branchName
-		}));
+		console.log('generate nginx vhosts');
+
+		_.each(deployConfig.vhosts, generateVhostConfig);
+
+		function generateVhostConfig (vhost) {
+			var vhostParams = {
+				upstream: getUpstream(paths.lowerBranchName, vhost.port),
+				upstreamName: getUpstreamName(deployConfig.domain, branchName, vhost.name),
+				domain: getDomain(deployConfig.domain, vhost.name, paths.lowerBranchName)
+			};
+			var vhostPath = getVhostPath(deployConfig.domain, branchName, vhost.name);
+			var vhostConfig = renderVhost(vhostParams);
+
+			console.log('vhost path: %s', vhostPath);
+			console.log('vhost params:');
+			console.log(JSON.stringify(vhostParams, null, 4));
+
+			fs.writeFileSync(vhostPath, vhostConfig);
+		}
+		console.log('generate nginx vhosts');
 	}
 
 	function createBranchCopy () {
@@ -51,8 +66,8 @@ module.exports = function startContainer (workspacePath, branchName) {
 		};
 
 		var containers = _.omit(config, ['nginx']);
-		containers[paths.lowerBranchName] = {
-			container_name: paths.lowerBranchName,
+		containers[paths.containerName] = {
+			container_name: paths.containerName,
 			build: paths.branch,
 			volumes: [
 				fmt('%s:/usr/src/app', paths.branch),
@@ -60,13 +75,14 @@ module.exports = function startContainer (workspacePath, branchName) {
 			]
 		};
 
+
 		_.each(containers, function (container) {
 			nginx.links.push(container.container_name);
 		});
 
 		containers['nginx'] = nginx;
 		fs.writeFileSync(paths.dockerComposeConfig, yaml.stringify(containers, 4));
-		console.log('containers configs generation finished');
+		console.log('containers configs generation finished: %s', paths.containerName);
 	}
 
 	function dockerComposeUp () {
@@ -78,12 +94,24 @@ module.exports = function startContainer (workspacePath, branchName) {
 	function reportSuccess () {
 		console.log('DONE MATHERFUCKER');
 	}
-}
 
-function getUpstream (branchName) {
-	return branchName + ':3000';
-}
+	function getUpstream (hostName, port) {
+		return fmt('%s:%s', hostName, port);
+	}
 
-function getDomain (branchName) {
-	return branchName + '.beatssound.ru';
+	function getUpstreamName (baseDomain, branchName, vhostName) {
+		return fmt('%s_%s_%s', vhostName, branchName, baseDomain);
+	}
+
+	function getDomain (baseDomain, vhostName, lowerBranchName) {
+		if (vhostName === '@') {
+			return fmt('%s.%s', lowerBranchName, baseDomain);
+		}
+
+		return fmt('%s.%s.%s', vhostName, lowerBranchName, baseDomain);
+	}
+
+	function getVhostPath (baseDomain, branchName, vhostName) {
+		return fmt('%s/%s', paths.nginxVhosts, getUpstreamName(baseDomain, branchName, vhostName));
+	}
 }
