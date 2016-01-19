@@ -75,8 +75,27 @@ module.exports = function startContainer (workspacePath, branchName, deployConfi
 			]
 		};
 
-		_.each(containers, function (container) {
-			nginx.links.push(container.container_name);
+		// Reset links
+		// It will be populated below with new links
+		_.each(containers, (container) => {
+			if (container.links) {
+				container.links = [];
+			}
+		});
+
+		if (deployConfig.links) {
+			containers[paths.containerName].links = [];
+		}
+
+		_.each(containers, (containerToLink) => {
+			// Add links to containers with link flag
+			_.each(containers, (container) => {
+				if (container.links && container.container_name != containerToLink.container_name) {
+					container.links.push(containerToLink.container_name);
+				}
+			});
+
+			nginx.links.push(containerToLink.container_name);
 		});
 
 		containers['nginx'] = nginx;

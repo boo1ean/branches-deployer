@@ -51,8 +51,17 @@ module.exports = function destroyContainer (workspacePath, branchName, deployCon
 
 	function regenerateDockerComposeConfig () {
 		console.log('start updating docker-compose.yml');
-		var toRemoveIndex = config.nginx.links.indexOf(paths.containerName);
-		config.nginx.links.splice(toRemoveIndex, 1);
+		// Remove destroyed container from links
+
+		_.each(config, (container) => {
+			if (container.links) {
+				var toRemoveIndex = container.links.indexOf(paths.containerName);
+				if (toRemoveIndex != -1) {
+					container.links.splice(toRemoveIndex, 1);
+				}
+			}
+		});
+
 		delete config[paths.containerName];
 		fs.writeFileSync(paths.dockerComposeConfig, yaml.stringify(config, 4));
 		console.log('finished updating docker-compose.yml (removed %s)', paths.containerName);
