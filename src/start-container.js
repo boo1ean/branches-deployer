@@ -87,7 +87,7 @@ module.exports = function startContainer (workspacePath, branchName, deployConfi
 			containers[paths.containerName].links = [];
 		}
 
-		if (deployConfig.branches[branchName]) {
+		if (deployConfig.branches && deployConfig.branches[branchName]) {
 			containers[paths.containerName] = _.extend(containers[paths.containerName], deployConfig.branches[branchName]);
 		}
 
