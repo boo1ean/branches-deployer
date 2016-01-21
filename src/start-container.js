@@ -87,6 +87,10 @@ module.exports = function startContainer (workspacePath, branchName, deployConfi
 			containers[paths.containerName].links = [];
 		}
 
+		if (deployConfig.container_options && _.isObject(deployConfig.container_options)) {
+			containers[paths.containerName] = _.extend(containers[paths.containerName], deployConfig.container_options);
+		}
+
 		if (deployConfig.branches && deployConfig.branches[branchName]) {
 			containers[paths.containerName] = _.extend(containers[paths.containerName], deployConfig.branches[branchName]);
 		}
