@@ -22,7 +22,7 @@ module.exports = function updateContainer (workspacePath, branchName, deployConf
 
 	function createBranchCopy () {
 		console.log('copy start');
-		exec(fmt('cd %s; git fetch; git checkout %s --force;', paths.repo, branchName, branchName));
+		exec(fmt('cd %s; git fetch; git checkout %s --force; git pull', paths.repo, branchName));
 		exec(fmt('mkdir -p %s; rsync -rv --exclude .git --exclude node_modules %s/* %s', paths.branch, paths.repo, paths.branch));
 		exec(fmt('ln -fs /repo/node_modules %s/node_modules', paths.branch));
 		exec(fmt('ln -fs /repo/vendor %s/vendor', paths.branch));

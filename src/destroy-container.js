@@ -31,7 +31,9 @@ module.exports = function destroyContainer (workspacePath, branchName, deployCon
 
 	function killContainer () {
 		console.log('start killing container');
-		exec(fmt('docker kill %s', paths.containerName));
+		try {
+			exec(fmt('docker kill %s', paths.containerName));
+		} catch (e) { console.log('container already dead'); }
 		console.log('finished killing container');
 	}
 
